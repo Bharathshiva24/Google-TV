@@ -104,6 +104,8 @@ loadDotEnv();
 
 const fileKey = () => (process.env.TMDB_API_KEY || '').trim();
 ipcMain.handle('tmdb-key', () => fileKey());
+ipcMain.handle('tmdb-feeds', (_e, key) =>
+  tmdb.feeds(key || fileKey()).catch(err => ({ error: String(err && err.message || err) })));
 ipcMain.handle('tmdb', (_e, title, key) =>
   tmdb.lookup(title, key || fileKey()).catch(err => ({ error: String(err && err.message || err) })));
 ipcMain.on('open', (_e, url, title) => { if (/^https?:\/\//.test(url)) openService(url, title); });

@@ -232,7 +232,7 @@ function setTab(n){
  document.body.classList.toggle('grid',isGrid);
  // the showcase rows and hero copy belong to "For you" only
  [h1,picksRow,h2,appsRow,title,sub,dots,brand].forEach(e=>{if(e)e.style.display=isGrid?'none':''});
- if(!isGrid){renderPicks(PICKS,'Top picks for you');gwrap.innerHTML='';return}
+ if(!isGrid){renderPicks(PICKS,picksHeading);gwrap.innerHTML='';return}
  gridAppEls=[];
  renderGrid(n==='Movies'?'movies':n==='Shows'?'shows':'apps');
  if(n==='Apps'&&window.hub&&window.hub.logos)
@@ -284,6 +284,7 @@ const picksRow=makeRow('picksRow',600,148);
 const appsRow=makeRow('appsRow',837,131);
 
 let curList=[],curHeading='';
+let picksHeading='Top picks for you';
 // ---- browse grids (Movies / Shows / Apps): vertical scroll, no horizontal scroll ----
 const gwrap=$('<div id="gwrap"></div>');
 gwrap.style.left=(123-OX-18)+'px';
@@ -344,7 +345,7 @@ function renderPicks(list,heading){
   picksRow.appendChild(a);
  });
 }
-renderPicks(PICKS,'Top picks for you');
+renderPicks(PICKS,picksHeading);
 const h2=$('<div class="s h2" id="appsH">Your apps</div>');h2.style.left=(123-OX)+'px';h2.style.top=(790-OY)+'px';S.appendChild(h2);
 const appEls=[];
 // Logos are always contain-fitted: never cropped, zoomed or stretched.
@@ -520,7 +521,54 @@ async function artwork(force){
 el('stRot').onchange=e=>{ST.rotate=e.target.checked;saveST();reset()};
 el('aAdd').onclick=()=>{let n=el('aN').value.trim(),u=el('aU').value.trim();if(!n||!u)return;if(!/^https?:\/\//.test(u))u='https://'+u;
  try{const x=JSON.parse(localStorage.getItem('gtv.extra')||'[]');x.push({n,name:n,u,bg:'#3a3a3c',fg:'#fff',fs:20});localStorage.setItem('gtv.extra',JSON.stringify(x))}catch{}location.reload()};
-el('tmdbSave').onclick=()=>{try{localStorage.setItem(TMDB_LS,el('tmdbKey').value.trim())}catch{}artwork(true)};
+/* ---- live banner + picks from TMDB -------------------------------------
+   Replaces the built-in lists with recent, popular titles so the home screen
+   stays current. Falls back silently to the curated lists on any failure. */
+function appForProvider(name){
+ if(!name)return null;
+ const n=name.toLowerCase().replace(/[^a-z]/g,'');
+ return APPS.find(a=>{
+  const an=(a.name||'').toLowerCase().replace(/[^a-z]/g,'');
+  return an&&(n.includes(an)||an.includes(n));
+ })||null;
+}
+async function loadLive(){
+ const key=await effectiveKey();
+ if(!key||!window.hub||!window.hub.tmdbFeeds)return;
+ let f;
+ try{ f=await window.hub.tmdbFeeds(key); }catch{ return; }
+ if(!f||f.error||!f.hero||!f.hero.length)return;
+
+ const slides=f.hero.map(h=>{
+  const app=appForProvider(h.provider);
+  return {
+   brand:['', app?app.name:(h.provider||'Trending'), ''],
+   title:h.name,
+   sub:h.overview?h.overview.split(/(?<=\.)\s/)[0].slice(0,120):(h.year?`${h.year} \u00b7 ${h.kind==='tv'?'Series':'Film'}`:'New release'),
+   tag:h.kind==='tv'?'New series':'New film',
+   c1:'#3a3f4a',c2:'#14161b',
+   url:app?app.u:'https://www.themoviedb.org/'+h.kind+'/'+h.id,
+   img:h.hero
+  };
+ });
+ SLIDES.splice(0,SLIDES.length,...slides);
+ show(0);reset();
+
+ const picks=[...f.shows.slice(0,3),...f.movies.slice(0,3)].map(x=>{
+  const a=appForProvider(x.provider);
+  return {t:x.name,name:x.name,year:x.year,img:x.card,poster:x.poster,
+          c1:'#3a3f4a',c2:'#14161b',
+          url:a?a.u:'https://www.themoviedb.org/'+x.kind+'/'+x.id};
+ });
+ if(picks.length){
+  PICKS.splice(0,PICKS.length,...picks);
+  picksHeading='Trending now';
+  if(curTab==='For you')renderPicks(PICKS,picksHeading);
+ }
+}
+loadLive();
+
+el('tmdbSave').onclick=()=>{try{localStorage.setItem(TMDB_LS,el('tmdbKey').value.trim())}catch{}artwork(true);loadLive()};
 artwork(false);
 el('stReset').onclick=()=>{try{localStorage.removeItem('gtv.settings');localStorage.removeItem('gtv.extra');localStorage.removeItem(TMDB_LS)}catch{}location.reload()};
 </script></body></html>

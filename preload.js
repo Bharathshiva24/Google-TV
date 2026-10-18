@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('hub', {
   logos: () => ipcRenderer.invoke('logos'),
   tmdb: (title, key) => ipcRenderer.invoke('tmdb', title, key),
   tmdbKey: () => ipcRenderer.invoke('tmdb-key'),
+  tmdbFeeds: (key) => ipcRenderer.invoke('tmdb-feeds', key),
   onLogos: (cb) => ipcRenderer.on('logos-updated', cb),
   onHome: (cb) => ipcRenderer.on('go-home', cb)
 });
