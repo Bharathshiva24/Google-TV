@@ -19,11 +19,13 @@
       "logos.js",
       "tmdb.js",
       "preload.js",
-      "renderer/**/*"
+      "renderer/**/*",
+      "build/icon.png"
     ],
     "mac": {
       "category": "public.app-category.entertainment",
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "build/icon.png"
     }
   },
   "license": "MIT",

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, shell, protocol, net } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, shell, protocol, net, nativeImage } = require('electron');
 const { pathToFileURL } = require('url');
 const logos = require('./logos');
 const tmdb = require('./tmdb');
@@ -104,6 +104,11 @@ app.whenReady().then(async () => {
   if (components && components.whenReady) {
     try { await components.whenReady(); console.log('Widevine ready:', components.status()); }
     catch (e) { console.warn('Widevine unavailable:', e); }
+  }
+  // Dock icon for `npm start`; packaged builds use build/icon.png via electron-builder.
+  if (process.platform === 'darwin' && app.dock) {
+    const ic = nativeImage.createFromPath(path.join(__dirname, 'build', 'icon.png'));
+    if (!ic.isEmpty()) app.dock.setIcon(ic);
   }
   app.userAgentFallback = realChromeUA();
   console.log('User agent:', app.userAgentFallback);
