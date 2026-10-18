@@ -86,8 +86,23 @@ function createWindow() {
 }
 
 ipcMain.handle('logos', () => logos.list());
-// Key lives in tmdb-key.txt, which is gitignored - never in the source.
-const fileKey = () => { try { return fs.readFileSync(path.join(__dirname, 'tmdb-key.txt'), 'utf8').trim(); } catch { return ''; } };
+// Secrets come from the environment, never from the source tree.
+// Order: real environment variable, then a local .env file (gitignored).
+function loadDotEnv() {
+  let txt;
+  try { txt = fs.readFileSync(path.join(__dirname, '.env'), 'utf8'); } catch { return; }
+  for (const line of txt.split(/\r?\n/)) {
+    if (!line.trim() || line.trim().startsWith('#')) continue;
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1];
+    const value = m[2].trim().replace(/^(['"])(.*)\1$/, '$2');
+    if (process.env[key] === undefined) process.env[key] = value;   // real env wins
+  }
+}
+loadDotEnv();
+
+const fileKey = () => (process.env.TMDB_API_KEY || '').trim();
 ipcMain.handle('tmdb-key', () => fileKey());
 ipcMain.handle('tmdb', (_e, title, key) =>
   tmdb.lookup(title, key || fileKey()).catch(err => ({ error: String(err && err.message || err) })));

@@ -1,4 +1,6 @@
 node_modules/
+.env
+.env.local
 tmdb-key.txt
 renderer/logos/auto/
 renderer/images/tmdb-cache-v2.json

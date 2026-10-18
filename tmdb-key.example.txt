@@ -1,4 +1,0 @@
-Paste your TMDB API key (v3 auth) into a file named tmdb-key.txt in this folder.
-Get one free at https://www.themoviedb.org/settings/api
-That file is gitignored, so the key never lands in the repository.
-You can also paste the key into the app's Settings panel (press S) instead.
