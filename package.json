@@ -14,7 +14,22 @@
   "build": {
     "appId": "com.local.streamhub",
     "productName": "Google TV",
-    "files": ["main.js", "logos.js", "tmdb.js", "preload.js", "renderer/**/*"],
-    "mac": { "category": "public.app-category.entertainment", "target": "dmg" }
-  }
+    "files": [
+      "main.js",
+      "logos.js",
+      "tmdb.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": "dmg"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bharathshiva24/Google-TV.git"
+  },
+  "author": "Bharath"
 }
