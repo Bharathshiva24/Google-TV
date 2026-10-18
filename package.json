@@ -1,0 +1,20 @@
+{
+  "name": "google-tv",
+  "version": "1.0.0",
+  "description": "Google TV",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac --publish never"
+  },
+  "devDependencies": {
+    "electron": "github:castlabs/electron-releases#v39.8.10+wvcus",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.local.streamhub",
+    "productName": "Google TV",
+    "files": ["main.js", "logos.js", "tmdb.js", "preload.js", "renderer/**/*"],
+    "mac": { "category": "public.app-category.entertainment", "target": "dmg" }
+  }
+}

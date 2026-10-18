@@ -1,0 +1,7 @@
+node_modules/
+tmdb-key.txt
+renderer/logos/auto/
+renderer/images/tmdb-cache-v2.json
+renderer/images/tmdb-cache.json
+dist/
+.DS_Store

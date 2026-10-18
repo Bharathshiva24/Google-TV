@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Google TV</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:"Google Sans","Product Sans",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;color:#e8eaed}
+body{background:#0a0a0c}
+#wrap{position:fixed;inset:0;display:grid;place-items:center}
+/* Fixed 1690x1014 design stage, scaled to fit the window */
+#stage{z-index:1;position:absolute;left:0;top:0;width:1690px;height:1014px;transform-origin:0 0}
+.screen{position:absolute;left:23px;top:51px;width:1654px;height:931px}
+/* everything below positioned in stage coordinates; offset by screen origin */
+.s{position:absolute}
+#hero{position:fixed;inset:0;z-index:0}
+#hero .glow{position:absolute;inset:0}
+#hero .fadeL{position:absolute;inset:0;background:linear-gradient(90deg,#0a0a0c 0%,#0a0a0ccc 22%,#0a0a0c00 62%)}
+#hero .fadeB{position:absolute;inset:0;background:linear-gradient(0deg,#0a0a0c 0%,#0a0a0ccc 18%,#0a0a0c00 52%)}
+.avatar{left:100px;top:48px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d9a273,#6b4630);box-shadow:0 0 0 1px #fff3;display:grid;place-items:center;font-size:22px;font-weight:600;color:#fff}
+.tab{top:42px;height:61px;line-height:61px;padding:0 28px;border-radius:31px;font-size:27px;color:#c4c7cc;cursor:pointer;white-space:nowrap;letter-spacing:.1px}
+.tab.on{background:#f1f3f4;color:#1a1a1d;font-weight:500}
+.ico{top:42px;width:61px;height:61px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#e8eaed}
+.ico.bg{background:#ffffff26}
+.gtv{top:42px;height:61px;line-height:61px;font-size:26px;color:#c4c7cc;left:1444px}
+.brandrow{left:100px;top:284px;display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:.3px}
+.brandrow i{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center}
+.brandrow i:after{content:"";border-left:13px solid #111;border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:3px}
+.brandrow b{font-weight:800}.brandrow span{font-weight:300}
+.brandrow em{font-style:normal;font-size:14px;font-weight:800;background:#fff;color:#111;border-radius:4px;padding:1px 5px}
+#title{left:100px;top:312px;font-size:75px;font-weight:400;letter-spacing:-1px;line-height:1.15;white-space:nowrap}
+#sub{left:100px;top:432px;font-size:27px;white-space:nowrap;display:flex;align-items:center}
+#sub u{text-decoration:none;display:inline-block;width:2px;height:34px;background:#888;margin:0 14px}
+#dots{left:1414px;top:446px;display:flex;gap:17px}
+#dots i{width:11px;height:11px;border-radius:50%;background:#ffffff40;display:block;cursor:pointer}
+#dots i.on{background:#e8eaed}
+.h2{font-size:21px;color:#b6b9be;letter-spacing:.2px}
+.card{position:relative;width:264px;height:148px;border-radius:22px;overflow:hidden;cursor:pointer;outline:none;transition:transform .15s,box-shadow .15s;display:block;text-decoration:none;color:#fff}
+.card:hover,.card:focus-visible,.app:hover,.app:focus-visible{transform:scale(1.07);box-shadow:0 0 0 4px #f1f3f4;z-index:5}
+.card.hasimg .t,.card.hasimg .o{display:none}
+.card .t{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-weight:800;font-size:23px;letter-spacing:2px;text-shadow:0 2px 8px #000a}
+.card .o{position:absolute;left:14px;top:10px;font-size:10px;letter-spacing:1px;opacity:.85}
+.app{position:relative;width:131px;height:131px;border-radius:50%;display:grid;place-items:center;text-align:center;cursor:pointer;outline:none;transition:transform .15s,box-shadow .15s;text-decoration:none;line-height:1.05;font-weight:800;overflow:hidden}
+#hint{left:100px;top:880px;font-size:12px;color:#6b7076}
+
+.ov{position:fixed;inset:0;z-index:50;display:none}
+.ov.on{display:block}
+#viewer{background:#000}
+#viewer.on{display:flex;flex-direction:column;pointer-events:none}
+#vbar{pointer-events:auto}
+#vbar{height:46px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#141417;color:#e8eaed;font-size:15px;border-bottom:1px solid #2a2a30}
+#vbar button,.pill{background:#2a2c31;color:#e8eaed;border:0;border-radius:999px;padding:7px 16px;font:inherit;cursor:pointer}
+#vbar button:hover,.pill:hover{background:#3a3d44}
+#vbar .t{flex:1;font-weight:500}
+#vnote{font-size:12px;color:#9aa0a6}
+#vframe{position:absolute;left:0;right:0;top:46px;bottom:0;width:100%;height:calc(100% - 46px);border:0;background:#fff}
+#search,#settings{background:#0a0a0cf2;backdrop-filter:blur(14px)}
+.panel{max-width:900px;margin:9vh auto 0;padding:0 24px;color:#e8eaed}
+.panel h2{font-weight:400;font-size:28px;margin:0 0 18px}
+#qi{width:100%;box-sizing:border-box;padding:18px 26px;font-size:26px;border-radius:40px;border:0;background:#2a2c31;color:#fff;outline:none}
+.sec{margin:26px 0 10px;color:#9aa0a6;font-size:15px}
+.res{display:flex;flex-wrap:wrap;gap:14px}
+.r{display:flex;align-items:center;gap:12px;background:#1d1e22;border-radius:16px;padding:10px 16px;cursor:pointer;font-size:17px;outline:none;border:2px solid transparent}
+.r:hover,.r:focus{border-color:#f1f3f4}
+.r i{width:36px;height:36px;border-radius:50%;display:block}
+.row2{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #26272c;font-size:18px}
+.row2 input[type=text]{background:#2a2c31;border:0;border-radius:10px;padding:10px;color:#fff;font-size:15px;width:200px}
+.x{position:fixed;top:22px;right:28px}
+
+.avatar{left:0;top:0;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d9a273,#6b4630);box-shadow:0 0 0 1px #fff3;display:grid;place-items:center;font-size:22px;font-weight:600;color:#fff;cursor:pointer;outline:none;transition:transform .15s,box-shadow .15s}
+.tab{top:0;height:61px;line-height:61px;padding:0 28px;border-radius:31px;font-size:27px;color:#c4c7cc;cursor:pointer;white-space:nowrap;outline:none;transition:background .15s,color .15s,box-shadow .15s}
+.tab:hover{background:#ffffff1a}
+.tab.on{background:#f1f3f4;color:#1a1a1d;font-weight:500}
+.ico{width:61px;height:61px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#e8eaed;outline:none;transition:background .15s,box-shadow .15s}
+.ico.bg{background:#ffffff26}
+.ico:hover{background:#ffffff33}
+.tab:focus-visible,.ico:focus-visible,.avatar:focus-visible{box-shadow:0 0 0 4px #f1f3f4}
+.gtv{height:61px;line-height:61px;font-size:26px;color:#c4c7cc}
+.empty{height:148px;display:flex;align-items:center;color:#9aa0a6;font-size:22px;white-space:nowrap}
+#hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,#0a0a0ccc 0%,#0a0a0c00 24%)}
+@keyframes heroIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+#hero .glow.anim{animation:heroIn .6s ease-out}
+#title,#sub,.brandrow{transition:opacity .3s}
+
+/* Horizontally scrollable rows. Padding leaves room for the hover/focus ring,
+   which would otherwise be clipped by the scroll container. */
+.srow{position:absolute;display:flex;gap:34px;align-items:center;padding:16px;
+      overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain}
+.srow::-webkit-scrollbar{display:none}
+.srow>*{flex:0 0 auto}
+
+/* Browse grids: vertical scrolling, fixed card geometry, no horizontal scroll. */
+#hero{transition:opacity .35s}
+body.grid #hero{opacity:.28}
+#gwrap{position:absolute;display:none;overflow-y:auto;overflow-x:hidden;
+       scrollbar-width:none;scroll-behavior:smooth;overscroll-behavior-y:contain}
+#gwrap::-webkit-scrollbar{display:none}
+body.grid #gwrap{display:block}
+.ggrid{display:grid;padding:4px 18px 70px}
+.ggrid.titles{grid-template-columns:repeat(4,1fr);gap:44px 34px}
+.ggrid.apps{grid-template-columns:repeat(5,1fr);gap:46px 34px;justify-items:center}
+.gitem{outline:none;cursor:pointer;display:block}
+.gart{width:100%;aspect-ratio:16/9;border-radius:18px;background:#191a1e center/cover no-repeat;
+      transition:transform .15s,box-shadow .15s}
+.gitem:hover .gart,.gitem:focus-visible .gart{transform:scale(1.05);box-shadow:0 0 0 4px #f1f3f4}
+.gicon{width:142px;height:142px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+       font-weight:800;line-height:1.05;text-align:center;transition:transform .15s,box-shadow .15s}
+.gitem:hover .gicon,.gitem:focus-visible .gicon{transform:scale(1.08);box-shadow:0 0 0 4px #f1f3f4}
+.glabel{margin-top:12px;font-size:17px;color:#e8eaed;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ggrid.apps .glabel{text-align:center;max-width:160px}
+.gyear{color:#9aa0a6;font-size:15px;margin-top:2px}
+</style></head>
+<body><div id="wrap"><div id="stage">
+  <div class="screen" id="screen"></div>
+</div></div>
+
+
+<div class="ov" id="viewer"><div id="vbar"><button id="vhome">← Home</button><div class="t" id="vtitle"></div><span id="vnote">If the page stays blank, this site blocks embedding.</span><button id="vreload">Reload</button><button id="vsame">Open in this tab</button></div><iframe id="vframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+<div class="ov" id="search"><button class="pill x" onclick="closeOv()">Close</button><div class="panel"><input id="qi" placeholder="Search apps, movies and shows" autocomplete="off"><div id="qres"></div></div></div>
+<div class="ov" id="settings"><button class="pill x" onclick="closeOv()">Close</button><div class="panel"><h2>Settings</h2>
+<div class="row2"><span>Rotate featured banner automatically</span><input type="checkbox" id="stRot" checked></div>
+<div class="row2"><span>Add an app</span><span><input type="text" id="aN" placeholder="Name"> <input type="text" id="aU" placeholder="https://…"> <button class="pill" id="aAdd">Add</button></span></div>
+<div class="row2"><span>TMDB API key<br><small style="color:#9aa0a6;font-size:13px">Fetches real poster and banner artwork. Free key from themoviedb.org</small></span><span><input type="text" id="tmdbKey" placeholder="paste key" style="width:230px"> <button class="pill" id="tmdbSave">Save</button></span></div>
+<div class="row2"><span>Artwork status</span><span id="tmdbStatus" style="color:#9aa0a6;font-size:15px">not configured</span></div>
+<div class="row2"><span>Reset to defaults</span><button class="pill" id="stReset">Reset</button></div>
+</div></div>
+<script>
+/* ======== EDIT YOUR CONTENT HERE ======== */
+const NAV=['For you','Movies','Shows','Apps'];
+
+// Hero slides. Add "img":"path/or/url.jpg" to use a real backdrop image.
+const SLIDES=[
+ {brand:['MX','PLAYER','TV'],title:'Aashram',sub:"A corrupt spiritual guru's world of crime and exploitation is exposed",tag:'Trending',c1:'#e8892b',c2:'#7a2e0a',url:'https://www.mxplayer.in'},
+ {brand:['','prime video',''],title:'Farzi',sub:'A small-time artist is pulled into a high-stakes counterfeiting racket',tag:'Trending',c1:'#2d9cdb',c2:'#0a2a4a',url:'https://www.primevideo.com/'},
+ {brand:['','SonyLIV',''],title:'Rocket Boys',sub:'The story of scientists Homi Bhabha and Vikram Sarabhai',tag:'Acclaimed',c1:'#8a9aa8',c2:'#2a3a48',url:'https://www.sonyliv.com'},
+ {brand:['','SonyLIV',''],title:'Scam 2003',sub:'The rise and fall of stamp-paper forger Abdul Karim Telgi',tag:'Popular',c1:'#6d7a5a',c2:'#1d2616',url:'https://www.sonyliv.com'},
+ {brand:['MX','PLAYER','TV'],title:'Samantar',sub:"A man discovers his life is repeating another man's, line for line",tag:'Trending',c1:'#7a7f86',c2:'#22262c',url:'https://www.mxplayer.in'}
+];
+
+// "Top picks" cards. Add "img" for real posters. url opens the title/service.
+const PICKS=[
+ {t:'ROCKET BOYS',c1:'#8a9aa8',c2:'#2a3a48',url:'https://www.sonyliv.com'},
+ {t:'QUEEN',c1:'#c9895a',c2:'#4a2312',o:'MX ORIGINAL',url:'https://www.mxplayer.in'},
+ {t:'F A R Z I',c1:'#3a3a40',c2:'#111114',url:'https://www.primevideo.com/'},
+ {t:'SAMANTAR',c1:'#7a7f86',c2:'#22262c',o:'MX ORIGINAL',url:'https://www.mxplayer.in'},
+ {t:'SCAM 2003',c1:'#6d7a5a',c2:'#1d2616',url:'https://www.sonyliv.com'},
+ {t:'',c1:'#c0261f',c2:'#6b0d0a',url:'#'}
+];
+
+// Your apps row. bg/fg = tile colours. Replace with your own logos via "img".
+const APPS=[
+ {id:'netflix',name:'Netflix',search:'https://www.netflix.com/search?q=',n:'NETFLIX',u:'https://www.netflix.com/browse',bg:'#fff',fg:'#e50914',fs:21},
+ {id:'youtube',name:'YouTube',search:'https://www.youtube.com/results?search_query=',n:'▶',u:'https://www.youtube.com/',bg:'#fff',fg:'#ff0000',fs:64},
+ {id:'prime',name:'Prime Video',search:'https://www.primevideo.com/search/?phrase=',n:'prime<br>video',u:'https://www.primevideo.com/',bg:'#1a74d8',fg:'#fff',fs:26},
+ {id:'hotstar',name:'Disney+ Hotstar',search:'https://www.hotstar.com/in/search?q=',n:'Disney+<br>hotstar',u:'https://www.hotstar.com/in',bg:'#0b1c4a',fg:'#fff',fs:22},
+ {id:'sunnxt',name:'Sun NXT',search:'https://www.sunnxt.com/search?q=',n:'SUN<br>NXT',u:'https://www.sunnxt.com/',bg:'#e8272b',fg:'#fff',fs:26},
+ {id:'appletv',name:'Apple TV',search:'https://tv.apple.com/search?term=',n:'tv',u:'https://tv.apple.com/',bg:'#3a3a3c',fg:'#fff',fs:60},
+ {id:'mxplayer',name:'MX Player',search:'https://www.mxplayer.in/search?q=',n:'MX<br>PLAYER',u:'https://www.mxplayer.in',bg:'#4a8bf0',fg:'#fff',fs:20},
+ {id:'zee5',name:'ZEE5',search:'https://www.zee5.com/search?q=',n:'ZEE5',u:'https://www.zee5.com',bg:'#0a0a0a',fg:'#fff',fs:34},
+ {id:'sonyliv',name:'Sony LIV',search:'https://www.sonyliv.com/search?q=',n:'SONY<br>LIV',u:'https://www.sonyliv.com',bg:'#10123a',fg:'#fff',fs:24},
+ {id:'spotify',name:'Spotify',search:'https://open.spotify.com/search/',n:'Spotify',u:'https://open.spotify.com',bg:'#1ed760',fg:'#0b0b0b',fs:20},
+ {id:'jio',name:'JioCinema',n:'▶',u:'https://www.jiocinema.com',bg:'#e5252e',fg:'#fff',fs:54}
+];
+try{JSON.parse(localStorage.getItem('gtv.extra')||'[]').forEach(a=>APPS.push(a))}catch{}
+/* ======================================== */
+
+const S=document.getElementById('screen'), $=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+// helper: place element using full-stage coordinates (stage coord - screen offset)
+const OX=23, OY=51;
+function put(el,x,y){ if(x!=null)el.style.left=(x-OX)+'px'; if(y!=null)el.style.top=(y-OY)+'px'; el.style.position='absolute'; S.appendChild(el); return el; }
+
+// hero background
+const hero=$('<div id="hero"><div class="glow"></div><div class="scrim"></div><div class="fadeL"></div><div class="fadeB"></div></div>');
+document.body.insertBefore(hero,document.getElementById('wrap'));
+function tryImg(base,cb,i=0){const ex=['jpg','jpeg','png','webp'];if(i>=ex.length)return;const im=new Image();im.onload=()=>cb(im.src);im.onerror=()=>tryImg(base,cb,i+1);im.src=base+'.'+ex[i]}
+function paintHero(s){
+ const g=hero.querySelector('.glow');g.classList.remove('anim');void g.offsetWidth;g.classList.add('anim');
+ g.style.background = s.img
+  ? `url(${s.img}) center/cover`
+  : `radial-gradient(38vmax 38vmax at 66% 38%, ${s.c1} 0%, ${s.c1}99 28%, ${s.c2} 62%, #0a0a0c 100%)`;
+}
+
+
+// ---- header (matches the original Google TV top bar) ----
+const tabX=[213,366,515,655];
+const avatar=$('<div class="s avatar" tabindex="0" title="Profile">B</div>');avatar.style.left=(123-OX)+'px';avatar.style.top=(99-OY)+'px';S.appendChild(avatar);
+const tabEls=NAV.map((n,i)=>{const e=$(`<div class="s tab${i==0?' on':''}" tabindex="0">${n}</div>`);e.style.left=(tabX[i]-OX)+'px';e.style.top=(93-OY)+'px';S.appendChild(e);e.onclick=()=>setTab(n);return e});
+function icon(x,svg,bg,fn,label){const e=$(`<div class="s ico${bg?' bg':''}" tabindex="0" title="${label}">${svg}</div>`);e.style.left=(x-OX)+'px';e.style.top=(93-OY)+'px';S.appendChild(e);e.onclick=fn;return e}
+icon(1304,'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',false,()=>openSearch(),'Search');
+icon(1385,'<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.3a.5.5 0 0 0-.6-.2l-2.4 1a7.6 7.6 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4H10.1a.5.5 0 0 0-.5.4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1a.5.5 0 0 0-.6.2L2.6 8.8a.5.5 0 0 0 .1.6l2 1.6a7.9 7.9 0 0 0 0 2l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.3c.1.2.4.3.6.2l2.4-1c.5.4 1.1.7 1.7 1l.4 2.5c0 .2.3.4.5.4h3.8c.3 0 .5-.2.5-.4l.4-2.5c.6-.3 1.2-.6 1.7-1l2.4 1c.2.1.5 0 .6-.2l1.9-3.3a.5.5 0 0 0-.1-.6z"/><circle cx="12" cy="12" r="3"/></svg>',true,()=>openSettings(),'Settings');
+const gt=$('<div class="s gtv">Google TV</div>');gt.style.left=(1467-OX)+'px';gt.style.top=(93-OY)+'px';S.appendChild(gt);
+
+// ---- tab content ----
+const MOVIES=[
+ {t:'Jawan',url:'https://www.netflix.com/browse'},
+ {t:'RRR',url:'https://www.hotstar.com/in'},
+ {t:'Leo',url:'https://www.hotstar.com/in'},
+ {t:'Pushpa 2: The Rule',url:'https://www.netflix.com/browse'},
+ {t:'Vikram',url:'https://www.hotstar.com/in'},
+ {t:'K.G.F: Chapter 2',url:'https://www.primevideo.com/'},
+ {t:'Animal',url:'https://www.netflix.com/browse'},
+ {t:'Pathaan',url:'https://www.primevideo.com/'},
+ {t:'Kantara',url:'https://www.primevideo.com/'},
+ {t:'Drishyam 2',url:'https://www.primevideo.com/'},
+ {t:'Sita Ramam',url:'https://www.primevideo.com/'},
+ {t:'Baahubali 2: The Conclusion',url:'https://www.netflix.com/browse'},
+ {t:'Dangal',url:'https://www.netflix.com/browse'},
+ {t:'Gangubai Kathiawadi',url:'https://www.netflix.com/browse'},
+ {t:'Shershaah',url:'https://www.primevideo.com/'},
+ {t:'3 Idiots',url:'https://www.netflix.com/browse'}
+];
+const SHOWS=[
+ {t:'Rocket Boys',url:'https://www.sonyliv.com'},
+ {t:'Farzi',url:'https://www.primevideo.com/'},
+ {t:'Samantar',url:'https://www.mxplayer.in'},
+ {t:'Scam 2003',url:'https://www.sonyliv.com'},
+ {t:'Aspirants',url:'https://www.primevideo.com/'},
+ {t:'Panchayat',url:'https://www.primevideo.com/'},
+ {t:'Mirzapur',url:'https://www.primevideo.com/'},
+ {t:'Sacred Games',url:'https://www.netflix.com/browse'},
+ {t:'The Family Man',url:'https://www.primevideo.com/'},
+ {t:'Delhi Crime',url:'https://www.netflix.com/browse'},
+ {t:'Paatal Lok',url:'https://www.primevideo.com/'},
+ {t:'Made in Heaven',url:'https://www.primevideo.com/'},
+ {t:'Kota Factory',url:'https://www.netflix.com/browse'},
+ {t:'Special Ops',url:'https://www.hotstar.com/in'},
+ {t:'Scam 1992: The Harshad Mehta Story',url:'https://www.sonyliv.com'},
+ {t:'Asur',url:'https://www.jiocinema.com'}
+];
+let curTab='For you';
+function setTab(n){
+ curTab=n;tabEls.forEach(e=>e.classList.toggle('on',e.textContent===n));
+ const isGrid = n!=='For you';
+ document.body.classList.toggle('grid',isGrid);
+ // the showcase rows and hero copy belong to "For you" only
+ [h1,picksRow,h2,appsRow,title,sub,dots,brand].forEach(e=>{if(e)e.style.display=isGrid?'none':''});
+ if(!isGrid){renderPicks(PICKS,'Top picks for you');gwrap.innerHTML='';return}
+ gridAppEls=[];
+ renderGrid(n==='Movies'?'movies':n==='Shows'?'shows':'apps');
+ if(n==='Apps'&&window.hub&&window.hub.logos)
+   window.hub.logos().then(m=>gridAppEls.forEach(({a,p})=>m[p.id]&&applyLogo(a,p,m[p.id])));
+}
+
+// hero text
+const brand=$('<div class="s brandrow"></div>');brand.style.left=(129-OX)+'px';brand.style.top=(334-OY)+'px';S.appendChild(brand);
+const title=$('<div class="s" id="title"></div>');title.style.left=(123-OX)+'px';title.style.top=(380-OY)+'px';S.appendChild(title);
+const sub=$('<div class="s" id="sub"></div>');sub.style.left=(123-OX)+'px';sub.style.top=(481-OY)+'px';S.appendChild(sub);
+const dots=$('<div class="s" id="dots"></div>');dots.style.left=(1436-OX)+'px';dots.style.top=(497-OY)+'px';S.appendChild(dots);
+let cur=0,timer;
+function show(i){
+ cur=(i+SLIDES.length)%SLIDES.length;const s=SLIDES[cur];
+ paintHero(s);
+ const [a,b,c]=s.brand;
+ brand.innerHTML=`<i></i>${a?`<b>${a}</b>`:''}<span>${b}</span>${c?`<em>${c}</em>`:''}`;
+ title.textContent=s.title;
+ sub.innerHTML=`<span>${s.tag}</span><u></u><span>${s.sub}</span>`;
+ dots.innerHTML='';SLIDES.forEach((_,k)=>{const d=document.createElement('i');if(k===cur)d.className='on';d.onclick=()=>{show(k);reset()};dots.appendChild(d)});
+}
+function reset(){clearInterval(timer);let on=true;try{on=(JSON.parse(localStorage.getItem('gtv.settings'))||{}).rotate!==false}catch{}if(on)timer=setInterval(()=>show(cur+1),7000)}
+title.style.cursor=sub.style.cursor='pointer';
+title.onclick=sub.onclick=()=>openUrl(SLIDES[cur].url,SLIDES[cur].title);
+SLIDES.forEach((sl,i)=>{if(!sl.img)tryImg('images/hero-'+(i+1),u=>{sl.img=u;if(cur===i)paintHero(sl)})});
+show(0);reset();
+
+// rows
+const h1=$('<div class="s h2" id="picksH">Top picks for you</div>');h1.style.left=(123-OX)+'px';h1.style.top=(553-OY)+'px';S.appendChild(h1);
+
+// A scrolling row: trackpad swipes work natively, a plain mouse wheel is mapped to
+// horizontal, and keyboard focus pulls the next item into view.
+function makeRow(id,top,height){
+ const r=$(`<div class="srow" id="${id}"></div>`);
+ r.style.left=(123-OX-16)+'px';
+ r.style.top=(top-OY-16)+'px';
+ r.style.width=(1654-(123-OX-16))+'px';
+ r.style.height=(height+32)+'px';
+ S.appendChild(r);
+ r.addEventListener('wheel',e=>{
+  if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&e.deltaY!==0){r.scrollLeft+=e.deltaY;e.preventDefault();}
+ },{passive:false});
+ r.addEventListener('focusin',e=>{
+  if(e.target.scrollIntoView)e.target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});
+ });
+ return r;
+}
+const picksRow=makeRow('picksRow',600,148);
+const appsRow=makeRow('appsRow',837,131);
+
+let curList=[],curHeading='';
+// ---- browse grids (Movies / Shows / Apps): vertical scroll, no horizontal scroll ----
+const gwrap=$('<div id="gwrap"></div>');
+gwrap.style.left=(123-OX-18)+'px';
+gwrap.style.top=(196-OY)+'px';
+gwrap.style.width=(1654-(123-OX-18)-86)+'px';
+gwrap.style.height=(931-(196-OY)-24)+'px';
+S.appendChild(gwrap);
+
+function gridCols(){const g=gwrap.firstElementChild;
+ return g?getComputedStyle(g).gridTemplateColumns.split(' ').length:4}
+
+function renderGrid(kind){
+ gwrap.innerHTML='';
+ const g=$(`<div class="ggrid ${kind==='apps'?'apps':'titles'}"></div>`);
+ if(kind==='apps'){
+  APPS.forEach(p=>{
+   const it=$('<div class="gitem" tabindex="0"></div>');
+   const ic=$(`<div class="gicon">${p.n}</div>`);
+   ic.style.background=p.bg;ic.style.color=p.fg;ic.style.fontSize=((p.fs||22)*1.05)+'px';
+   const lb=$(`<div class="glabel">${p.name||p.n.replace(/<br>/g,' ')}</div>`);
+   it.append(ic,lb);
+   if(p.id)gridAppEls.push({a:ic,p});
+   it.onclick=()=>openUrl(p.u,p.name||p.n.replace(/<br>/g,' '));
+   g.appendChild(it);
+  });
+ }else{
+  (kind==='movies'?MOVIES:SHOWS).forEach(p=>{
+   const it=$('<div class="gitem" tabindex="0"></div>');
+   const art=$('<div class="gart"></div>');
+   if(p.img){art.style.backgroundImage=`url(${p.img})`;
+    // posters are 2:3 - letterbox instead of cropping the subject out of frame
+    art.style.backgroundSize=p.poster?'contain':'cover';}
+   const lb=$(`<div class="glabel">${p.name||p.t}</div>`);
+   it.append(art,lb);
+   if(p.year)it.append($(`<div class="gyear">${p.year}</div>`));
+   it.onclick=()=>openUrl(p.url,p.name||p.t);
+   g.appendChild(it);
+  });
+ }
+ gwrap.appendChild(g);
+ gwrap.scrollTop=0;
+}
+let gridAppEls=[];
+
+function renderPicks(list,heading){
+ curList=list;curHeading=heading;
+ picksRow.innerHTML='';h1.textContent=heading;
+ if(!list.length){
+  const e=$('<div class="empty">Nothing here yet. Open an app or a title and it will show up in your library.</div>');
+  picksRow.appendChild(e);return;
+ }
+ list.forEach((p,i)=>{
+  const a=$(`<div class="card" tabindex="0"></div>`);
+  const paint=()=>{a.style.background=p.img?`url(${p.img}) center/cover`:`linear-gradient(160deg,${p.c1},${p.c2})`;a.classList.toggle('hasimg',!!p.img)};paint();
+  if(!p.img&&!p.lib&&list===PICKS)tryImg('images/pick-'+(i+1),u=>{p.img=u;paint()});
+  a.innerHTML=(p.o?`<span class="o">${p.o}</span>`:'')+`<span class="t">${p.t}</span>`;
+  a.onclick=()=>{if(p.url&&p.url!=='#')openUrl(p.url,p.t||'');else if(p.q)openSearch(p.q)};
+  picksRow.appendChild(a);
+ });
+}
+renderPicks(PICKS,'Top picks for you');
+const h2=$('<div class="s h2" id="appsH">Your apps</div>');h2.style.left=(123-OX)+'px';h2.style.top=(790-OY)+'px';S.appendChild(h2);
+const appEls=[];
+// Logos are always contain-fitted: never cropped, zoomed or stretched.
+// When the icon brings its own opaque background we paint the tile that colour and let
+// the icon fill it, so a square icon blends into the circle instead of being clipped.
+function applyLogo(a,p,meta){
+ const srcs=[{src:'logos/'+p.id+'.png'},{src:'logos/'+p.id+'.svg'}];
+ if(meta)srcs.push(typeof meta==='string'?{src:meta}:meta);
+ (function next(i){
+  if(i>=srcs.length)return;
+  const m=srcs[i],im=new Image();
+  im.onload=()=>{
+   a.innerHTML='';
+   a.style.background=m.bg||p.bg;
+   const fill=!!m.bg;                       // icon supplies its own backdrop
+   im.style.cssText='display:block;margin:auto;object-fit:contain;'+
+     (fill?'width:100%;height:100%':'width:64%;height:64%');
+   a.appendChild(im);
+  };
+  im.onerror=()=>next(i+1);
+  im.src=m.src;
+ })(0);
+}
+APPS.forEach((p,i)=>{
+ const a=$(`<div class="app" tabindex="0">${p.n}</div>`);
+ if(p.id){appEls.push({a,p});applyLogo(a,p)}
+ a.style.background=p.bg;a.style.color=p.fg;a.style.fontSize=(p.fs||22)+'px';
+ a.onclick=()=>openUrl(p.u,p.name||p.n.replace(/<br>/g,' '));
+ appsRow.appendChild(a);
+});
+// official logos downloaded by the desktop app (Electron only)
+if(window.hub&&window.hub.logos){const load=()=>window.hub.logos().then(m=>appEls.forEach(({a,p})=>m[p.id]&&applyLogo(a,p,m[p.id])));load();window.hub.onLogos(load)}
+
+// scale stage to window
+function fit(){const s=Math.min(innerWidth/1654,innerHeight/931);
+ const tx=(innerWidth-1654*s)/2-23*s, ty=(innerHeight-931*s)/2-51*s;
+ document.getElementById('stage').style.transform=`translate(${tx}px,${ty}px) scale(${s})`;}
+addEventListener('resize',fit);fit();
+
+function fs(){if(window.hub)return window.hub.fullscreen();try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}}
+document.addEventListener('dblclick',e=>{if(!e.target.closest('a'))fs()});
+document.addEventListener('keydown',e=>{if(e.key==='f'||e.key==='F')fs()});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement.matches('.card,.app,.tab,.ico,.avatar,.gitem'))document.activeElement.click()});
+// arrow-key (D-pad) navigation between cards and apps
+// grid navigation: left/right within a row, up/down by one row
+document.addEventListener('keydown',e=>{
+ if(!document.body.classList.contains('grid'))return;
+ if(!e.key.startsWith('Arrow')||document.querySelector('.ov.on')||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+ const items=[...document.querySelectorAll('.gitem')];
+ if(!items.length)return;
+ const head=[...document.querySelectorAll('.avatar,.tab,.ico')].sort((a,b)=>a.getBoundingClientRect().left-b.getBoundingClientRect().left);
+ const f=document.activeElement,i=items.indexOf(f),cols=gridCols();
+ e.preventDefault();
+ if(i<0){ // coming from the header
+  if(e.key==='ArrowDown')items[0].focus();
+  else{const hi=head.indexOf(f);if(hi>=0){if(e.key==='ArrowRight')(head[hi+1]||head[hi]).focus();if(e.key==='ArrowLeft')(head[hi-1]||head[hi]).focus();}}
+  return;
+ }
+ let n=i;
+ if(e.key==='ArrowRight')n=Math.min(i+1,items.length-1);
+ if(e.key==='ArrowLeft')n=Math.max(i-1,0);
+ if(e.key==='ArrowDown')n=Math.min(i+cols,items.length-1);
+ if(e.key==='ArrowUp'){
+  if(i<cols){(tabEls.find(t=>t.classList.contains('on'))||head[0]).focus();return}
+  n=i-cols;
+ }
+ items[n].focus();
+ items[n].scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+
+document.addEventListener('keydown',e=>{
+ if(!e.key.startsWith('Arrow')||document.querySelector('.ov.on')||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+ if(document.body.classList.contains('grid'))return;   // grid tabs have their own handler
+ const head=[...document.querySelectorAll('.avatar,.tab,.ico')].sort((a,b)=>a.getBoundingClientRect().left-b.getBoundingClientRect().left);
+ const vis=e=>e.offsetParent!==null;
+ const cards=[...document.querySelectorAll('.card')].filter(vis),apps=[...document.querySelectorAll('.app')].filter(vis);
+ const rows=[head,cards,apps].filter(r=>r.length),f=document.activeElement;
+ let ri=rows.findIndex(r=>r.includes(f));
+ if(ri<0){(cards[0]||apps[0]||head[0]).focus();e.preventDefault();return}
+ const r=rows[ri],i=r.indexOf(f);e.preventDefault();
+ if(e.key==='ArrowRight')(r[i+1]||r[i]).focus();
+ if(e.key==='ArrowLeft')(r[i-1]||r[i]).focus();
+ if(e.key==='ArrowDown'&&rows[ri+1])rows[ri+1][Math.min(i,rows[ri+1].length-1)].focus();
+ if(e.key==='ArrowUp'&&rows[ri-1]){const up=rows[ri-1];(up===head?(tabEls.find(t=>t.classList.contains('on'))||up[0]):up[Math.min(i,up.length-1)]).focus()}
+});
+
+/* ---- viewer / search / settings ---- */
+const ST=(()=>{try{return JSON.parse(localStorage.getItem('gtv.settings'))||{}}catch{return {}}})();
+const saveST=()=>{try{localStorage.setItem('gtv.settings',JSON.stringify(ST))}catch{}};
+const el=id=>document.getElementById(id);
+function closeOv(){document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'));if(window.hub&&el('viewer').classList.contains('on'))window.hub.home();el('vframe').src='about:blank'}
+const HUB=window.hub||null;
+function openUrl(u,t){
+ if(HUB){el('vtitle').textContent=t||u;el('vnote').style.display='none';el('vsame').style.display='none';el('vframe').style.display='none';el('viewer').classList.add('on');el('viewer').style.background='transparent';HUB.open(u,t);return}
+el('vtitle').textContent=t||u;el('vframe').src=u;el('viewer').classList.add('on');el('vhome').focus();el('vsame').onclick=()=>{location.href=u}}
+el('vhome').onclick=()=>{if(HUB)HUB.home();closeOv()};el('vreload').onclick=()=>{if(HUB)return HUB.reload();const f=el('vframe');f.src=f.src};
+if(HUB)HUB.onHome(()=>closeOv());
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOv()});
+
+function catalog(){
+ const items=[];
+ APPS.forEach(a=>items.push({k:'app',t:a.name||a.n.replace(/<br>/g,' '),u:a.u,c:a.bg,a}));
+ PICKS.filter(p=>p.t).forEach(p=>items.push({k:'title',t:(/^(\S ){2,}\S$/.test(p.t.trim())?p.t.replace(/ /g,''):p.t.trim()),u:p.url,c:p.c1}));
+ SLIDES.forEach(s=>items.push({k:'title',t:s.title,u:s.url,c:s.c1,sub:s.sub}));
+ return items;
+}
+function openSearch(q){closeOv();el('search').classList.add('on');el('qi').value=q||'';runSearch(q||'');setTimeout(()=>el('qi').focus(),30)}
+function runSearch(q){
+ q=q.trim().toLowerCase();const box=el('qres');box.innerHTML='';
+ const cat=catalog();
+ const add=(title,list)=>{if(!list.length)return;const h=document.createElement('div');h.className='sec';h.textContent=title;box.appendChild(h);
+  const r=document.createElement('div');r.className='res';list.forEach(x=>{const d=document.createElement('div');d.className='r';d.tabIndex=0;
+   d.innerHTML=`<i style="background:${x.c||'#444'}"></i><span>${x.label||x.t}</span>`;
+   const go=()=>{closeOv();openUrl(x.u,x.t)};d.onclick=go;d.onkeydown=e=>{if(e.key==='Enter')go()};r.appendChild(d)});box.appendChild(r)};
+ const match=x=>!q||(x.t+' '+(x.sub||'')).toLowerCase().includes(q);
+ add('Apps',cat.filter(x=>x.k==='app'&&match(x)));
+ add('Titles',cat.filter(x=>x.k==='title'&&match(x)));
+ if(q){ // search the query inside each service, shown in the viewer
+  add(`Search "${el('qi').value.trim()}" in…`,APPS.filter(a=>a.search).map(a=>({t:a.name+' · '+el('qi').value.trim(),label:a.name,u:a.search+encodeURIComponent(el('qi').value.trim()),c:a.bg})));
+ }
+ if(q&&!box.children.length)box.innerHTML='<div class="sec">No matches</div>';
+}
+el('qi').addEventListener('input',e=>runSearch(e.target.value));
+el('qi').addEventListener('keydown',e=>{
+ if(e.key==='Enter'){const f=el('qres').querySelector('.r');if(f)f.click()}
+ if(e.key==='ArrowDown'){const f=el('qres').querySelector('.r');if(f){f.focus();e.preventDefault()}}
+});
+el('qres').addEventListener('keydown',e=>{const r=[...document.querySelectorAll('#qres .r')],i=r.indexOf(document.activeElement);
+ if(e.key==='ArrowRight'||e.key==='ArrowDown'){(r[i+1]||r[i]).focus();e.preventDefault()}
+ if(e.key==='ArrowLeft'||e.key==='ArrowUp'){(i>0?r[i-1]:el('qi')).focus();e.preventDefault()}});
+document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.metaKey||e.ctrlKey)))&&!el('search').classList.contains('on')){e.preventDefault();openSearch()}});
+
+document.addEventListener('keydown',e=>{if((e.key==='s'||e.key==='S')&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&!document.querySelector('.ov.on'))openSettings()});
+function openSettings(){closeOv();el('settings').classList.add('on');el('stRot').checked=ST.rotate!==false;effectiveKey().then(k=>el('tmdbKey').value=k)}
+
+/* ---- real artwork from TMDB ---- */
+const TMDB_LS='gtv.tmdbKey';
+// No key in the source. Settings wins; otherwise the app reads tmdb-key.txt.
+const tmdbKey=()=>{try{return localStorage.getItem(TMDB_LS)||''}catch{return ''}};
+async function effectiveKey(){
+ const k=tmdbKey(); if(k)return k;
+ if(window.hub&&window.hub.tmdbKey){try{return (await window.hub.tmdbKey())||''}catch{}}
+ return '';
+}
+function setStatus(t){const e=el('tmdbStatus');if(e)e.textContent=t}
+let arting=false;
+async function artwork(force){
+ const key=await effectiveKey();
+ if(!key){setStatus('not configured');return}
+ if(!window.hub||!window.hub.tmdb){setStatus('only available in the desktop app');return}
+ if(arting)return; arting=true;
+ setStatus('loading…');
+ let got=0,miss=0;
+ try{
+  for(const sl of SLIDES){
+   if(sl.img&&!force)continue;
+   const r=await window.hub.tmdb(sl.title,key);
+   if(r&&r.error){setStatus(r.error);arting=false;return}
+   if(r&&r.hero){sl.img=r.hero;got++;if(SLIDES[cur]===sl)paintHero(sl)}else miss++;
+  }
+  for(const p of [...PICKS,...MOVIES,...SHOWS]){
+   if(!p.t||(p.img&&!force))continue;
+   const r=await window.hub.tmdb(p.t,key);
+   if(r&&r.error){setStatus(r.error);arting=false;return}
+   if(r&&r.card){p.img=r.card;p.poster=!!r.poster;if(r.name)p.name=r.name;if(r.year)p.year=r.year;got++}else miss++;
+  }
+  if(curTab==='For you')renderPicks(curList,curHeading);
+  else setTab(curTab);
+  setStatus(got?`loaded ${got} images`+(miss?`, ${miss} not found`:''):'no artwork found');
+ }catch(e){setStatus('failed: '+e.message)}
+ arting=false;
+}
+el('stRot').onchange=e=>{ST.rotate=e.target.checked;saveST();reset()};
+el('aAdd').onclick=()=>{let n=el('aN').value.trim(),u=el('aU').value.trim();if(!n||!u)return;if(!/^https?:\/\//.test(u))u='https://'+u;
+ try{const x=JSON.parse(localStorage.getItem('gtv.extra')||'[]');x.push({n,name:n,u,bg:'#3a3a3c',fg:'#fff',fs:20});localStorage.setItem('gtv.extra',JSON.stringify(x))}catch{}location.reload()};
+el('tmdbSave').onclick=()=>{try{localStorage.setItem(TMDB_LS,el('tmdbKey').value.trim())}catch{}artwork(true)};
+artwork(false);
+el('stReset').onclick=()=>{try{localStorage.removeItem('gtv.settings');localStorage.removeItem('gtv.extra');localStorage.removeItem(TMDB_LS)}catch{}location.reload()};
+</script></body></html>
