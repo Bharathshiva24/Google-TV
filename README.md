@@ -7,6 +7,12 @@ so each one runs its own official web player with its own DRM and your own accou
 ![MIT License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
 
+![The home screen, with trending titles from TMDB](docs/home.jpg)
+
+<p align="center"><em>Netflix running inside the app, with its own player and DRM</em></p>
+
+![Netflix open inside the launcher](docs/in-app.jpg)
+
 ---
 
 ## Overview
