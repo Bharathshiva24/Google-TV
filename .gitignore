@@ -7,4 +7,5 @@ renderer/images/tmdb-cache-v2.json
 renderer/images/tmdb-feed.json
 renderer/images/tmdb-cache.json
 dist/
+release/
 .DS_Store

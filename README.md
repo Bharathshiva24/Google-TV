@@ -179,13 +179,49 @@ Each service keeps an isolated session. To clear all of them:
 rm -rf ~/Library/Application\ Support/Google\ TV/Partitions
 ```
 
-### Building a distributable
+### Building a standalone app
 
 ```bash
 npm run dist
 ```
 
-Produces a `.dmg` in `dist/`. VMP signing must be done before packaging.
+Produces `Google TV.app` and a `.dmg` in `release/`. Drag the app to
+Applications and it launches like any other Mac app — no Terminal, correct name
+and icon in the Dock and menu bar.
+
+The `dist` script runs three steps in order, and **the order matters**:
+
+| Step | Command | Why |
+|---|---|---|
+| 1 | `npm run dist:dir` | Packages the app without a DMG |
+| 2 | `npm run dist:sign` | VMP-signs the packaged `.app` |
+| 3 | `npm run dist:dmg` | Wraps the signed app in a DMG |
+
+`build.electronDownload.mirror` points at castLabs' releases. Without it,
+electron-builder looks for `39.8.10+wvcus` on the official Electron releases
+and fails with a 404, since that build only exists in castLabs' repository.
+
+VMP signing has to come **after** packaging. electron-builder rewrites the
+binary and applies the icon, which invalidates any signature made earlier — so
+signing `node_modules/electron/dist` first (fine for `npm start`) does not carry
+through to a packaged build.
+
+The build is arm64-only and unsigned by Apple. On first launch macOS will warn
+that the developer cannot be verified; right-click the app and choose **Open**,
+or clear the quarantine flag:
+
+```bash
+xattr -cr "/Applications/Google TV.app"
+```
+
+For a packaged app, put your `.env` in the app's data folder rather than beside
+the code, since the source is bundled read-only:
+
+```
+~/Library/Application Support/Google TV/.env
+```
+
+Or just paste the key into Settings (`S`) on first run.
 
 ---
 

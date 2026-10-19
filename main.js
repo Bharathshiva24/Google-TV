@@ -89,8 +89,13 @@ ipcMain.handle('logos', () => logos.list());
 // Secrets come from the environment, never from the source tree.
 // Order: real environment variable, then a local .env file (gitignored).
 function loadDotEnv() {
-  let txt;
-  try { txt = fs.readFileSync(path.join(__dirname, '.env'), 'utf8'); } catch { return; }
+  const candidates = [path.join(__dirname, '.env')];
+  try { candidates.push(path.join(app.getPath('userData'), '.env')); } catch {}
+  let txt = null;
+  for (const file of candidates) {
+    try { txt = fs.readFileSync(file, 'utf8'); break; } catch {}
+  }
+  if (txt === null) return;
   for (const line of txt.split(/\r?\n/)) {
     if (!line.trim() || line.trim().startsWith('#')) continue;
     const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
@@ -100,7 +105,6 @@ function loadDotEnv() {
     if (process.env[key] === undefined) process.env[key] = value;   // real env wins
   }
 }
-loadDotEnv();
 
 const fileKey = () => (process.env.TMDB_API_KEY || '').trim();
 ipcMain.handle('tmdb-key', () => fileKey());
@@ -116,6 +120,7 @@ ipcMain.on('toggle-fullscreen', () => win.setFullScreen(!win.isFullScreen()));
 ipcMain.handle('sign-out', async (_e, id) => { await session.fromPartition('persist:' + id).clearStorageData(); return true; });
 
 app.setName('Google TV');
+loadDotEnv();
 protocol.registerSchemesAsPrivileged([{ scheme: 'gtvlogo', privileges: { standard: true, secure: true, supportFetchAPI: true, bypassCSP: true } }]);
 app.whenReady().then(async () => {
   if (components && components.whenReady) {

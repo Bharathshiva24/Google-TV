@@ -5,14 +5,17 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac --publish never"
+    "dist:dir": "electron-builder --mac --dir",
+    "dist:sign": "python3 -m castlabs_evs.vmp sign-pkg \"$(find release -maxdepth 2 -name '*.app' -print -quit)\"",
+    "dist:dmg": "electron-builder --mac dmg --prepackaged \"$(dirname \"$(find release -maxdepth 2 -name '*.app' -print -quit)\")\"",
+    "dist": "npm run dist:dir && npm run dist:sign && npm run dist:dmg"
   },
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v39.8.10+wvcus",
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.local.streamhub",
+    "appId": "com.bharathshiva.googletv",
     "productName": "Google TV",
     "files": [
       "main.js",
@@ -22,10 +25,41 @@
       "renderer/**/*",
       "build/icon.png"
     ],
+    "directories": {
+      "output": "release"
+    },
     "mac": {
       "category": "public.app-category.entertainment",
-      "target": "dmg",
-      "icon": "build/icon.png"
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Google TV",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "electronDownload": {
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/"
     }
   },
   "license": "MIT",
