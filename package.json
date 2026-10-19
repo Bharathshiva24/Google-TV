@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dist:dir": "electron-builder --mac --dir",
-    "dist:sign": "python3 -m castlabs_evs.vmp sign-pkg \"$(find release -maxdepth 2 -name '*.app' -print -quit)\"",
+    "dist:sign": "python3 -m castlabs_evs.vmp sign-pkg \"$(dirname \"$(find release -maxdepth 2 -name '*.app' -print -quit)\")\"",
     "dist:dmg": "electron-builder --mac dmg --prepackaged \"$(dirname \"$(find release -maxdepth 2 -name '*.app' -print -quit)\")\"",
     "dist": "npm run dist:dir && npm run dist:sign && npm run dist:dmg"
   },
